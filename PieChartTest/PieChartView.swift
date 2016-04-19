@@ -43,16 +43,16 @@ class PieChartView: UIView {
     }
     
     //MARK: - operations (internal)
-    func reDraw(index:Int){
-        var curIndex = index - 1
-        if index == 0{
-            curIndex = dataItem.count - 1
-        }
-        
-        var rotateRadian = dataItem[curIndex] / itemValueAmount + dataItem[index] / itemValueAmount
-        rotateRadian = -rotateRadian * CGFloat(M_PI)
-        rotateContainerLayerWithRadian(rotateRadian)
+func reDraw(index:Int){
+    var curIndex = index - 1
+    if index == 0{
+        curIndex = dataItem.count - 1
     }
+    
+    var rotateRadian = dataItem[curIndex] / itemValueAmount + dataItem[index] / itemValueAmount
+    rotateRadian = -rotateRadian * CGFloat(M_PI)
+    rotateContainerLayerWithRadian(rotateRadian)
+}
     
     //MARK: - setupViews (private)
     private func setupViews(frame: CGRect){
@@ -67,28 +67,28 @@ class PieChartView: UIView {
         self.addSubview(redIndicator)
     }
     
-    private func setupRotateLayers(){
-        
-        containerLayer = CAShapeLayer()
-        containerLayer.frame = CGRectMake(0, 0, self.bounds.width, self.bounds.width)
-        var percentageStart:CGFloat = 0
-        var percentageEnd:CGFloat = 0
-        
-        for i in 0...dataItem.count - 1{
-            percentageEnd += dataItem[i] / itemValueAmount
-            let pieLayer = generateLayers(radius, layerFrameWidth: layerWidth, percentageStart: percentageStart, percentageEnd: percentageEnd)
-            containerLayer.addSublayer(pieLayer)
-            percentageStart = percentageEnd
-        }
-        
-        gradientMask(radius, width: layerWidth)
-        if dataItem.count > 0{
-            let initRotateRadian = -CGFloat(M_PI) * dataItem[0] / itemValueAmount
-            rotateContainerLayerWithRadian(initRotateRadian)
-        }
-        
-        self.layer.addSublayer(containerLayer)
+private func setupRotateLayers(){
+    
+    containerLayer = CAShapeLayer()
+    containerLayer.frame = CGRectMake(0, 0, self.bounds.width, self.bounds.width)
+    var percentageStart:CGFloat = 0
+    var percentageEnd:CGFloat = 0
+    
+    for i in 0...dataItem.count - 1{
+        percentageEnd += dataItem[i] / itemValueAmount
+        let pieLayer = generateLayers(radius, layerFrameWidth: layerWidth, percentageStart: percentageStart, percentageEnd: percentageEnd)
+        containerLayer.addSublayer(pieLayer)
+        percentageStart = percentageEnd
     }
+    
+    gradientMask(radius, width: layerWidth)
+    if dataItem.count > 0{
+        let initRotateRadian = -CGFloat(M_PI) * dataItem[0] / itemValueAmount
+        rotateContainerLayerWithRadian(initRotateRadian)
+    }
+    
+    self.layer.addSublayer(containerLayer)
+}
     
     private func gradientMask(radius:CGFloat, width:CGFloat){
         containerLayer.mask = generateLayers(radius, layerFrameWidth: width, percentageStart: 0, percentageEnd: 1)
@@ -112,18 +112,18 @@ class PieChartView: UIView {
         return pieLayer
     }
     
-    private func rotateContainerLayerWithRadian(radian:CGFloat){
+private func rotateContainerLayerWithRadian(radian:CGFloat){
+    
+    let myAnimation = CABasicAnimation(keyPath: "transform.rotation")
+    let myRotationTransform = CATransform3DRotate(containerLayer.transform, radian, 0, 0, 1)
+    if let rotationAtStart = containerLayer.valueForKeyPath("transform.rotation") {
         
-        let myAnimation = CABasicAnimation(keyPath: "transform.rotation")
-        let myRotationTransform = CATransform3DRotate(containerLayer.transform, radian, 0, 0, 1)
-        if let rotationAtStart = containerLayer.valueForKeyPath("transform.rotation") {
-            
-            myAnimation.fromValue = rotationAtStart.floatValue
-            myAnimation.toValue = CGFloat(rotationAtStart.floatValue) + radian
-        }
-        containerLayer.transform = myRotationTransform
-        myAnimation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
-        containerLayer.addAnimation(myAnimation, forKey: "transform.rotation")
+        myAnimation.fromValue = rotationAtStart.floatValue
+        myAnimation.toValue = CGFloat(rotationAtStart.floatValue) + radian
     }
+    containerLayer.transform = myRotationTransform
+    myAnimation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
+    containerLayer.addAnimation(myAnimation, forKey: "transform.rotation")
+}
     
 }
