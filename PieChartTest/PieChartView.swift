@@ -10,22 +10,12 @@ import UIKit
 
 class PieChartView: UIView {
     
-    var rectLayer:CAShapeLayer!
-    var angle:CGFloat = CGFloat(M_PI_2)
-    
     //MARK: - properties (public)
-    var lineWidth:CGFloat = 10
-    
+    var lineWidth:CGFloat = 20
     
     //MARK: - properties (private)
-    private var itemTitleLabel:UILabel!
-    private var itemMoneyLabel:UILabel!
-    private var itemIconBtn:UIButton!
-    private var itemPercentage:UILabel!
-    private var itemAccountCount:UILabel!
-    private var rotateBtn:UIButton!
-    
-    private var dataItem:Array<CGFloat>
+    private var containerLayer:CAShapeLayer!
+    private var dataItem:[CGFloat]
     private var itemValueAmount:CGFloat{
         var amount:CGFloat = 0
         for value in dataItem{
@@ -33,18 +23,21 @@ class PieChartView: UIView {
         }
         return amount
     }
-    private var containerLayer:CAShapeLayer!
     
-    
-
+    private var radius:CGFloat{
+        return self.frame.width / 4
+    }
+    private var layerWidth:CGFloat{
+        return self.frame.width / 2
+    }
     
     //MARK: - init
-    init(frame:CGRect, dataItem:Array<CGFloat>){
+    init(frame:CGRect, dataItem:[CGFloat]){
         self.dataItem = dataItem
         super.init(frame: frame)
-        setupViews()
+        setupViews(frame)
     }
-
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -62,28 +55,38 @@ class PieChartView: UIView {
     }
     
     //MARK: - setupViews (private)
-    private func setupViews(){
+    private func setupViews(frame: CGRect){
+        setupIndicator(frame)
         setupRotateLayers()
+        
+    }
+    private func setupIndicator(frame:CGRect){
+        let redIndicator = UIView(frame: CGRectMake(0, 0, 1, 30))
+        redIndicator.center = CGPointMake(frame.width/2, 60)
+        redIndicator.backgroundColor = UIColor.redColor()
+        self.addSubview(redIndicator)
     }
     
-    private  func setupRotateLayers(){
-        
-        let radius = self.frame.width / 4
-        let layerWidth = self.frame.width / 2
+    private func setupRotateLayers(){
         
         containerLayer = CAShapeLayer()
         containerLayer.frame = CGRectMake(0, 0, self.bounds.width, self.bounds.width)
         var percentageStart:CGFloat = 0
         var percentageEnd:CGFloat = 0
+        
         for i in 0...dataItem.count - 1{
             percentageEnd += dataItem[i] / itemValueAmount
             let pieLayer = generateLayers(radius, layerFrameWidth: layerWidth, percentageStart: percentageStart, percentageEnd: percentageEnd)
             containerLayer.addSublayer(pieLayer)
             percentageStart = percentageEnd
         }
+        
         gradientMask(radius, width: layerWidth)
-        let initRotateRadian = -CGFloat(M_PI) * dataItem[0] / itemValueAmount
-        rotateContainerLayerWithRadian(initRotateRadian)
+        if dataItem.count > 0{
+            let initRotateRadian = -CGFloat(M_PI) * dataItem[0] / itemValueAmount
+            rotateContainerLayerWithRadian(initRotateRadian)
+        }
+        
         self.layer.addSublayer(containerLayer)
     }
     
@@ -98,12 +101,9 @@ class PieChartView: UIView {
     }
     
     private func generateLayers(radius:CGFloat, layerFrameWidth:CGFloat, percentageStart:CGFloat, percentageEnd:CGFloat) -> CAShapeLayer{
-        
-        let path = UIBezierPath(arcCenter: CGPointMake(radius, radius), radius: radius, startAngle: CGFloat(-M_PI_2), endAngle: CGFloat(3 * M_PI_2) , clockwise: true)
+        let path = UIBezierPath(arcCenter: CGPointMake(layerWidth, layerWidth), radius: radius, startAngle: CGFloat(-M_PI_2), endAngle: CGFloat(3 * M_PI_2) , clockwise: true)
         let pieLayer = CAShapeLayer()
         pieLayer.path = path.CGPath
-        pieLayer.frame = CGRectMake(0, 0, layerFrameWidth, layerFrameWidth)
-        pieLayer.position = CGPointMake(self.frame.width / 2, self.frame.width / 2)
         pieLayer.lineWidth = lineWidth
         pieLayer.strokeColor = UIColor(hue: percentageEnd, saturation: 0.5, brightness: 0.75, alpha: 1.0).CGColor
         pieLayer.fillColor = nil
