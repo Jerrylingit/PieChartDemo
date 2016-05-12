@@ -15,6 +15,7 @@ class ViewController: UIViewController {
     
     var i:Int = 1
     var containerLayer:CALayer!
+    let dataItem:[CGFloat] = [40, 70, 50, 40, 50, 60, 70, 80, 90, 100]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,7 +24,7 @@ class ViewController: UIViewController {
     
     func setup(){
         let frame = CGRectMake(0, 0, self.view.bounds.width, self.view.bounds.height - 100)
-        let pieView = PieChartView(frame: frame, dataItem: [10,20,30,40,50,60,70])
+        let pieView = PieChartView(frame: frame, dataItem: self.dataItem)
         pieView.autoresizingMask = [.FlexibleTopMargin, .FlexibleLeftMargin, .FlexibleRightMargin, .FlexibleBottomMargin]
         self.pieView = pieView
         self.view.addSubview(pieView)
@@ -33,7 +34,7 @@ class ViewController: UIViewController {
         
         pieView.reDraw(i)
         i += 1
-        if i == 7{
+        if i == dataItem.count{
             i = 0
         }
     }
